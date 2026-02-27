@@ -1,0 +1,305 @@
+/* ============================================================
+   HYPERTENSION DETECTION - STYLESHEET
+   File location: static/style.css
+   ============================================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #1e293b;
+}
+
+/* ---- HEADER ---- */
+.header {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2d6a4f 100%);
+    color: white;
+    padding: 1.2rem 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.logo {
+    font-size: 2.5rem;
+}
+
+.header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+}
+
+.header p {
+    font-size: 0.85rem;
+    opacity: 0.85;
+}
+
+.header-badges {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.badge {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.4);
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    color: white;
+}
+
+/* ---- MAIN CONTAINER ---- */
+.container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+}
+
+/* ---- LEFT PANEL (FORM) ---- */
+.left-panel {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+}
+
+.form-title {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.form-title h2 {
+    font-size: 1.3rem;
+    color: #1e3a5f;
+}
+
+.form-title p {
+    color: #64748b;
+    font-size: 0.9rem;
+    margin-top: 0.3rem;
+}
+
+/* ---- FORM ROWS & GROUPS ---- */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.form-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.form-group select {
+    padding: 0.6rem 0.8rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: #374151;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.form-group select:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+/* ---- SUBMIT BUTTON ---- */
+.submit-btn {
+    width: 100%;
+    padding: 1rem;
+    margin-top: 1.5rem;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: opacity 0.2s, transform 0.1s;
+}
+
+.submit-btn:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+}
+
+.submit-btn:active {
+    transform: translateY(0);
+}
+
+/* ---- RESULT BOX ---- */
+.result-box {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-left: 6px solid #10B981;
+}
+
+.result-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.result-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+}
+
+.result-header h2 {
+    font-size: 1.2rem;
+    margin-bottom: 0.3rem;
+}
+
+.result-header p {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-top: 0.4rem;
+}
+
+.risk-badge {
+    display: inline-block;
+    padding: 0.2rem 0.8rem;
+    border-radius: 20px;
+    color: white;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.result-box h3 {
+    font-size: 1rem;
+    color: #1e3a5f;
+    margin-bottom: 0.8rem;
+}
+
+.recommendations {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.recommendations li {
+    background: white;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    color: #374151;
+    border-left: 3px solid #667eea;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+/* ---- RIGHT PANEL (SIDEBAR) ---- */
+.right-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.info-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+}
+
+.info-card h3 {
+    font-size: 1rem;
+    color: #1e3a5f;
+    margin-bottom: 0.8rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.info-card p {
+    font-size: 0.85rem;
+    color: #64748b;
+    line-height: 1.6;
+    margin-bottom: 0.8rem;
+}
+
+.info-card ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.info-card ul li {
+    font-size: 0.83rem;
+    color: #374151;
+}
+
+/* ---- BP TABLE ---- */
+.bp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.83rem;
+}
+
+.bp-table tr {
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.bp-table td {
+    padding: 0.5rem 0.3rem;
+    color: #374151;
+}
+
+.bp-table td:last-child {
+    text-align: right;
+    font-weight: 600;
+    color: #1e3a5f;
+}
+
+/* ---- FOOTER ---- */
+.footer {
+    text-align: center;
+    padding: 1.5rem;
+    color: rgba(255,255,255,0.8);
+    font-size: 0.82rem;
+    line-height: 1.8;
+}
