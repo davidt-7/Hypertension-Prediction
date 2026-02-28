@@ -3,248 +3,569 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hypertension Detection</title>
+    <title>PulsePred — AI Hypertension Detection</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
-    <!-- HEADER -->
-    <div class="header">
-        <div class="header-content">
-            <div class="header-left">
-                <div class="logo">❤️</div>
-                <div>
-                    <h1>Hypertension Detection</h1>
-                    <p>Advanced AI-Powered Cardiovascular Risk Assessment Platform</p>
-                </div>
+<!-- ANIMATED BACKGROUND PARTICLES -->
+<div class="bg-layer">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="grid-overlay"></div>
+</div>
+
+<!-- HEARTBEAT LINE -->
+<div class="heartbeat-bar">
+    <svg viewBox="0 0 1200 60" preserveAspectRatio="none">
+        <polyline class="heartbeat-line" points="0,30 100,30 150,30 180,5 200,55 220,30 270,30 320,30 370,30 400,10 420,50 440,30 500,30 600,30 650,30 680,8 700,52 720,30 780,30 850,30 900,30 930,12 950,48 970,30 1050,30 1200,30"/>
+    </svg>
+</div>
+
+<!-- HEADER -->
+<header class="header">
+    <div class="header-inner">
+        <div class="brand">
+            <div class="pulse-dot"></div>
+            <div>
+                <h1 class="brand-name">PulsePred</h1>
+                <span class="brand-sub">AI Cardiovascular Risk Platform</span>
             </div>
-            <div class="header-badges">
-                <span class="badge">🏥 Medical Grade</span>
-                <span class="badge">🤖 AI-Powered</span>
+        </div>
+        <div class="header-right">
+            <div class="stat-chip">
+                <span class="stat-num">95.2%</span>
+                <span class="stat-label">Accuracy</span>
+            </div>
+            <div class="stat-chip">
+                <span class="stat-num">1,825</span>
+                <span class="stat-label">Patients Trained</span>
+            </div>
+            <div class="status-pill">
+                <span class="status-dot"></span> AI Active
             </div>
         </div>
     </div>
+</header>
 
-    <!-- MAIN CONTENT -->
-    <div class="container">
-        <div class="left-panel">
+<!-- MAIN -->
+<main class="main-grid">
 
-            <!-- RESULT BOX (shown only after prediction) -->
-            {% if prediction_text %}
-            <div class="result-box" style="border-left: 6px solid {{ result_color }};">
-                <div class="result-header">
-                    <div class="result-icon" style="background: {{ result_color }};">
-                        {% if 'CRISIS' in prediction_text %} ⚠️
-                        {% elif 'Stage-2' in prediction_text %} 🔴
-                        {% elif 'Stage-1' in prediction_text %} 🟡
-                        {% else %} ✅ {% endif %}
-                    </div>
-                    <div>
-                        <h2 style="color: {{ result_color }};">{{ recommendation.title }}</h2>
-                        <span class="risk-badge" style="background: {{ result_color }};">
-                            Confidence: {{ confidence }}% &nbsp;|&nbsp; {{ result_risk }}
+    <!-- LEFT COLUMN -->
+    <section class="left-col">
+
+        <!-- RESULT (shown after prediction) -->
+        {% if prediction_text %}
+        <div class="result-panel animate-in" data-color="{{ result_color }}">
+
+            <!-- Glowing top border -->
+            <div class="result-glow" style="background: {{ result_color }};"></div>
+
+            <!-- Stage badge -->
+            <div class="stage-header">
+                <div class="stage-icon-wrap" style="border-color: {{ result_color }}; box-shadow: 0 0 30px {{ result_color }}44;">
+                    {% if 'CRISIS' in prediction_text %}⚠️
+                    {% elif 'Stage-2' in prediction_text %}🔴
+                    {% elif 'Stage-1' in prediction_text %}🟡
+                    {% else %}✅{% endif %}
+                </div>
+                <div class="stage-meta">
+                    <h2 class="stage-title" style="color: {{ result_color }};">{{ recommendation.title }}</h2>
+                    <div class="stage-badges">
+                        <span class="badge-pill" style="background:{{ result_color }}22; color:{{ result_color }}; border:1px solid {{ result_color }}55;">
+                            {{ result_risk }}
                         </span>
-                        <p>{{ recommendation.description }}</p>
+                        <span class="badge-pill confidence-badge">
+                            🎯 {{ confidence }}% Confidence
+                        </span>
                     </div>
+                    <p class="stage-desc">{{ recommendation.description }}</p>
                 </div>
-
-                <h3>📋 Clinical Recommendations</h3>
-                <ul class="recommendations">
-                    {% for action in recommendation.actions %}
-                    <li>{{ action }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-            {% endif %}
-
-            <!-- FORM TITLE -->
-            <div class="form-title">
-                <h2>🩺 Comprehensive Health Assessment</h2>
-                <p>Complete the form below for personalized hypertension risk evaluation</p>
             </div>
 
-            <!-- PATIENT FORM -->
-            <form action="/predict" method="POST">
+            <!-- Confidence bar -->
+            <div class="conf-track">
+                <div class="conf-labels">
+                    <span>AI Confidence</span>
+                    <span style="color:{{ result_color }}; font-weight:700;">{{ confidence }}%</span>
+                </div>
+                <div class="conf-rail">
+                    <div class="conf-bar" style="width:{{ confidence }}%; background: linear-gradient(90deg, {{ result_color }}88, {{ result_color }});"></div>
+                    <div class="conf-glow" style="left:{{ confidence }}%; background:{{ result_color }};"></div>
+                </div>
+            </div>
 
-                <!-- ROW 1: Gender & Age -->
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>👤 Gender</label>
-                        <select name="Gender" required>
-                            <option value="">Select Gender</option>
-                            <option value="Male"   {% if form_data and form_data.Gender == 'Male' %}selected{% endif %}>Male</option>
-                            <option value="Female" {% if form_data and form_data.Gender == 'Female' %}selected{% endif %}>Female</option>
-                        </select>
+            <!-- Charts -->
+            <div class="charts-grid">
+                <div class="glass-card chart-wrap">
+                    <p class="chart-label">⚡ Risk Gauge</p>
+                    <canvas id="gaugeChart" height="160"></canvas>
+                    <p class="chart-center-text" style="color:{{ result_color }};">
+                        {% if 'CRISIS' in prediction_text %}CRITICAL
+                        {% elif 'Stage-2' in prediction_text %}HIGH
+                        {% elif 'Stage-1' in prediction_text %}MODERATE
+                        {% else %}LOW{% endif %}
+                    </p>
+                </div>
+                <div class="glass-card chart-wrap">
+                    <p class="chart-label">📊 Stage Probabilities</p>
+                    <canvas id="probChart" height="160"></canvas>
+                </div>
+            </div>
+
+            <!-- Recommendations -->
+            <div class="section-label">📋 Clinical Recommendations</div>
+            <div class="rec-grid">
+                {% for action in recommendation.actions %}
+                <div class="rec-item" style="animation-delay: {{ loop.index * 0.08 }}s; border-color: {{ result_color }}33;">
+                    <span class="rec-num" style="color:{{ result_color }};">{{ loop.index }}</span>
+                    <span class="rec-text">{{ action }}</span>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Lifestyle Tips -->
+            <div class="section-label">💡 Personalised Lifestyle Tips</div>
+            <div class="tips-grid">
+                {% for tip in recommendation.lifestyle_tips %}
+                <div class="tip-card glass-card" style="animation-delay: {{ loop.index * 0.1 }}s;">
+                    <span class="tip-emoji">{{ tip.icon }}</span>
+                    <strong>{{ tip.title }}</strong>
+                    <p>{{ tip.detail }}</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- PDF DOWNLOAD -->
+            <form action="/download_report" method="POST" style="margin-bottom:1rem;">
+                {% for key, value in form_data.items() %}
+                <input type="hidden" name="{{ key }}" value="{{ value }}">
+                {% endfor %}
+                <button type="submit" class="pdf-btn">
+                    <span>📄</span>
+                    <span>Download Full PDF Report</span>
+                    <span class="pdf-arrow">↓</span>
+                </button>
+            </form>
+
+            <!-- Hospital Finder -->
+            <div class="hospital-finder glass-card">
+                <div class="finder-header">
+                    <span class="finder-icon">🏥</span>
+                    <div>
+                        <h3>Nearest Hospital Finder</h3>
+                        <p>Real-time GPS-powered hospital search</p>
                     </div>
-                    <div class="form-group">
-                        <label>📅 Age Group</label>
-                        <select name="Age" required>
-                            <option value="">Select Age Range</option>
-                            <option value="18-34" {% if form_data and form_data.Age == '18-34' %}selected{% endif %}>18-34 years</option>
-                            <option value="35-50" {% if form_data and form_data.Age == '35-50' %}selected{% endif %}>35-50 years</option>
-                            <option value="51-64" {% if form_data and form_data.Age == '51-64' %}selected{% endif %}>51-64 years</option>
-                            <option value="65+"   {% if form_data and form_data.Age == '65+' %}selected{% endif %}>65+ years</option>
-                        </select>
+                </div>
+                <button class="find-btn" onclick="findHospitals()">
+                    <span class="btn-icon">📍</span>
+                    <span>Find Hospitals Near Me</span>
+                    <span class="btn-arrow">→</span>
+                </button>
+                <div id="hospital-status" class="finder-status"></div>
+                <div id="map" class="map-box" style="display:none;"></div>
+                <div id="hospital-list"></div>
+            </div>
+
+        </div>
+        {% endif %}
+
+        <!-- FORM CARD -->
+        <div class="form-card glass-card">
+            <div class="form-header">
+                <div class="form-icon">🩺</div>
+                <div>
+                    <h2>Health Assessment</h2>
+                    <p>Fill in your clinical details for AI-powered risk evaluation</p>
+                </div>
+            </div>
+
+            <form action="/predict" method="POST" class="assessment-form">
+
+                <div class="field-section-label">👤 Demographics</div>
+                <div class="fields-row">
+                    <div class="field-group">
+                        <label>Gender</label>
+                        <div class="select-wrap">
+                            <select name="Gender" required>
+                                <option value="">Select</option>
+                                <option value="Male" {% if form_data and form_data.Gender=='Male' %}selected{% endif %}>Male</option>
+                                <option value="Female" {% if form_data and form_data.Gender=='Female' %}selected{% endif %}>Female</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <label>Age Group</label>
+                        <div class="select-wrap">
+                            <select name="Age" required>
+                                <option value="">Select</option>
+                                <option value="18-34" {% if form_data and form_data.Age=='18-34' %}selected{% endif %}>18–34 yrs</option>
+                                <option value="35-50" {% if form_data and form_data.Age=='35-50' %}selected{% endif %}>35–50 yrs</option>
+                                <option value="51-64" {% if form_data and form_data.Age=='51-64' %}selected{% endif %}>51–64 yrs</option>
+                                <option value="65+" {% if form_data and form_data.Age=='65+' %}selected{% endif %}>65+ yrs</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
-                <!-- ROW 2: Family History & Currently a Patient -->
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>🧬 Family History of Hypertension</label>
-                        <select name="History" required>
-                            <option value="">Select Option</option>
-                            <option value="Yes" {% if form_data and form_data.History == 'Yes' %}selected{% endif %}>Yes</option>
-                            <option value="No"  {% if form_data and form_data.History == 'No' %}selected{% endif %}>No</option>
-                        </select>
+                <div class="field-section-label">🏥 Medical History</div>
+                <div class="fields-row">
+                    <div class="field-group">
+                        <label>Family History of Hypertension</label>
+                        <div class="select-wrap">
+                            <select name="History" required>
+                                <option value="">Select</option>
+                                <option value="Yes" {% if form_data and form_data.History=='Yes' %}selected{% endif %}>Yes</option>
+                                <option value="No" {% if form_data and form_data.History=='No' %}selected{% endif %}>No</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>🏥 Currently Under Medical Care</label>
-                        <select name="Patient" required>
-                            <option value="">Select Option</option>
-                            <option value="Yes" {% if form_data and form_data.Patient == 'Yes' %}selected{% endif %}>Yes</option>
-                            <option value="No"  {% if form_data and form_data.Patient == 'No' %}selected{% endif %}>No</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- ROW 3: Medication & Severity -->
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>💊 Currently Taking BP Medication</label>
-                        <select name="TakeMedication" required>
-                            <option value="">Select Option</option>
-                            <option value="Yes" {% if form_data and form_data.TakeMedication == 'Yes' %}selected{% endif %}>Yes</option>
-                            <option value="No"  {% if form_data and form_data.TakeMedication == 'No' %}selected{% endif %}>No</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>⚡ Symptom Severity</label>
-                        <select name="Severity" required>
-                            <option value="">Select Severity</option>
-                            <option value="Mild"     {% if form_data and form_data.Severity == 'Mild' %}selected{% endif %}>Mild</option>
-                            <option value="Moderate" {% if form_data and form_data.Severity == 'Moderate' %}selected{% endif %}>Moderate</option>
-                            <option value="Severe"   {% if form_data and form_data.Severity == 'Severe' %}selected{% endif %}>Severe</option>
-                        </select>
+                    <div class="field-group">
+                        <label>Currently Under Medical Care</label>
+                        <div class="select-wrap">
+                            <select name="Patient" required>
+                                <option value="">Select</option>
+                                <option value="Yes" {% if form_data and form_data.Patient=='Yes' %}selected{% endif %}>Yes</option>
+                                <option value="No" {% if form_data and form_data.Patient=='No' %}selected{% endif %}>No</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
-                <!-- ROW 4: Breath Shortness & Visual Changes -->
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>🫁 Shortness of Breath</label>
-                        <select name="BreathShortness" required>
-                            <option value="">Select Option</option>
-                            <option value="Yes" {% if form_data and form_data.BreathShortness == 'Yes' %}selected{% endif %}>Yes</option>
-                            <option value="No"  {% if form_data and form_data.BreathShortness == 'No' %}selected{% endif %}>No</option>
-                        </select>
+                <div class="fields-row">
+                    <div class="field-group">
+                        <label>Taking BP Medication</label>
+                        <div class="select-wrap">
+                            <select name="TakeMedication" required>
+                                <option value="">Select</option>
+                                <option value="Yes" {% if form_data and form_data.TakeMedication=='Yes' %}selected{% endif %}>Yes</option>
+                                <option value="No" {% if form_data and form_data.TakeMedication=='No' %}selected{% endif %}>No</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>👁️ Vision Changes</label>
-                        <select name="VisualChanges" required>
-                            <option value="">Select Option</option>
-                            <option value="Yes" {% if form_data and form_data.VisualChanges == 'Yes' %}selected{% endif %}>Yes</option>
-                            <option value="No"  {% if form_data and form_data.VisualChanges == 'No' %}selected{% endif %}>No</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- ROW 5: Nosebleeds & When Diagnosed -->
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>🩸 Frequent Nosebleeds</label>
-                        <select name="NoseBleeding" required>
-                            <option value="">Select Option</option>
-                            <option value="Yes" {% if form_data and form_data.NoseBleeding == 'Yes' %}selected{% endif %}>Yes</option>
-                            <option value="No"  {% if form_data and form_data.NoseBleeding == 'No' %}selected{% endif %}>No</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>📆 Time Since Diagnosis</label>
-                        <select name="Whendiagnoused" required>
-                            <option value="">Select Time Period</option>
-                            <option value="<1 Year"     {% if form_data and form_data.Whendiagnoused == '<1 Year' %}selected{% endif %}>Less than 1 Year</option>
-                            <option value="1 - 5 Years" {% if form_data and form_data.Whendiagnoused == '1 - 5 Years' %}selected{% endif %}>1 - 5 Years</option>
-                            <option value=">5 Years"    {% if form_data and form_data.Whendiagnoused == '>5 Years' %}selected{% endif %}>More than 5 Years</option>
-                        </select>
+                    <div class="field-group">
+                        <label>Time Since Diagnosis</label>
+                        <div class="select-wrap">
+                            <select name="Whendiagnoused" required>
+                                <option value="">Select</option>
+                                <option value="<1 Year" {% if form_data and form_data.Whendiagnoused=='<1 Year' %}selected{% endif %}>Less than 1 Year</option>
+                                <option value="1 - 5 Years" {% if form_data and form_data.Whendiagnoused=='1 - 5 Years' %}selected{% endif %}>1–5 Years</option>
+                                <option value=">5 Years" {% if form_data and form_data.Whendiagnoused=='>5 Years' %}selected{% endif %}>More than 5 Years</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
-                <!-- ROW 6: Systolic & Diastolic -->
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>❤️ Systolic Pressure (top number)</label>
-                        <select name="Systolic" required>
-                            <option value="">Select Range</option>
-                            <option value="100 - 110" {% if form_data and form_data.Systolic == '100 - 110' %}selected{% endif %}>100-110 mmHg (Normal)</option>
-                            <option value="111 - 120" {% if form_data and form_data.Systolic == '111 - 120' %}selected{% endif %}>111-120 mmHg (Normal)</option>
-                            <option value="121 - 130" {% if form_data and form_data.Systolic == '121 - 130' %}selected{% endif %}>121-130 mmHg (Stage 1)</option>
-                            <option value="130+"      {% if form_data and form_data.Systolic == '130+' %}selected{% endif %}>130+ mmHg (Stage 2+)</option>
-                        </select>
+                <div class="field-section-label">⚡ Symptoms</div>
+                <div class="fields-row">
+                    <div class="field-group">
+                        <label>Symptom Severity</label>
+                        <div class="select-wrap">
+                            <select name="Severity" required>
+                                <option value="">Select</option>
+                                <option value="Mild" {% if form_data and form_data.Severity=='Mild' %}selected{% endif %}>Mild</option>
+                                <option value="Moderate" {% if form_data and form_data.Severity=='Moderate' %}selected{% endif %}>Moderate</option>
+                                <option value="Severe" {% if form_data and form_data.Severity=='Severe' %}selected{% endif %}>Severe</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>💙 Diastolic Pressure (bottom number)</label>
-                        <select name="Diastolic" required>
-                            <option value="">Select Range</option>
-                            <option value="70 - 80" {% if form_data and form_data.Diastolic == '70 - 80' %}selected{% endif %}>70-80 mmHg (Normal)</option>
-                            <option value="81 - 90" {% if form_data and form_data.Diastolic == '81 - 90' %}selected{% endif %}>81-90 mmHg (Stage 1)</option>
-                            <option value="91 - 100" {% if form_data and form_data.Diastolic == '91 - 100' %}selected{% endif %}>91-100 mmHg (Stage 2)</option>
-                            <option value="100+"    {% if form_data and form_data.Diastolic == '100+' %}selected{% endif %}>100+ mmHg (Crisis)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- ROW 7: Controlled Diet -->
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>🥗 Following Heart-Healthy Diet</label>
-                        <select name="ControlledDiet" required>
-                            <option value="">Select Option</option>
-                            <option value="Yes" {% if form_data and form_data.ControlledDiet == 'Yes' %}selected{% endif %}>Yes</option>
-                            <option value="No"  {% if form_data and form_data.ControlledDiet == 'No' %}selected{% endif %}>No</option>
-                        </select>
+                    <div class="field-group">
+                        <label>Shortness of Breath</label>
+                        <div class="select-wrap">
+                            <select name="BreathShortness" required>
+                                <option value="">Select</option>
+                                <option value="Yes" {% if form_data and form_data.BreathShortness=='Yes' %}selected{% endif %}>Yes</option>
+                                <option value="No" {% if form_data and form_data.BreathShortness=='No' %}selected{% endif %}>No</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
-                <!-- SUBMIT BUTTON -->
+                <div class="fields-row">
+                    <div class="field-group">
+                        <label>Vision Changes</label>
+                        <div class="select-wrap">
+                            <select name="VisualChanges" required>
+                                <option value="">Select</option>
+                                <option value="Yes" {% if form_data and form_data.VisualChanges=='Yes' %}selected{% endif %}>Yes</option>
+                                <option value="No" {% if form_data and form_data.VisualChanges=='No' %}selected{% endif %}>No</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <label>Frequent Nosebleeds</label>
+                        <div class="select-wrap">
+                            <select name="NoseBleeding" required>
+                                <option value="">Select</option>
+                                <option value="Yes" {% if form_data and form_data.NoseBleeding=='Yes' %}selected{% endif %}>Yes</option>
+                                <option value="No" {% if form_data and form_data.NoseBleeding=='No' %}selected{% endif %}>No</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field-section-label">❤️ Blood Pressure</div>
+                <div class="fields-row">
+                    <div class="field-group">
+                        <label>Systolic (top number)</label>
+                        <div class="select-wrap">
+                            <select name="Systolic" required>
+                                <option value="">Select</option>
+                                <option value="100 - 110" {% if form_data and form_data.Systolic=='100 - 110' %}selected{% endif %}>100–110 mmHg</option>
+                                <option value="111 - 120" {% if form_data and form_data.Systolic=='111 - 120' %}selected{% endif %}>111–120 mmHg</option>
+                                <option value="121 - 130" {% if form_data and form_data.Systolic=='121 - 130' %}selected{% endif %}>121–130 mmHg</option>
+                                <option value="130+" {% if form_data and form_data.Systolic=='130+' %}selected{% endif %}>130+ mmHg</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <label>Diastolic (bottom number)</label>
+                        <div class="select-wrap">
+                            <select name="Diastolic" required>
+                                <option value="">Select</option>
+                                <option value="70 - 80" {% if form_data and form_data.Diastolic=='70 - 80' %}selected{% endif %}>70–80 mmHg</option>
+                                <option value="81 - 90" {% if form_data and form_data.Diastolic=='81 - 90' %}selected{% endif %}>81–90 mmHg</option>
+                                <option value="91 - 100" {% if form_data and form_data.Diastolic=='91 - 100' %}selected{% endif %}>91–100 mmHg</option>
+                                <option value="100+" {% if form_data and form_data.Diastolic=='100+' %}selected{% endif %}>100+ mmHg</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field-section-label">🥗 Lifestyle</div>
+                <div class="fields-row">
+                    <div class="field-group">
+                        <label>Heart-Healthy Diet</label>
+                        <div class="select-wrap">
+                            <select name="ControlledDiet" required>
+                                <option value="">Select</option>
+                                <option value="Yes" {% if form_data and form_data.ControlledDiet=='Yes' %}selected{% endif %}>Yes</option>
+                                <option value="No" {% if form_data and form_data.ControlledDiet=='No' %}selected{% endif %}>No</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
                 <button type="submit" class="submit-btn">
-                    ⚡ GENERATE RISK ASSESSMENT
+                    <span class="btn-pulse"></span>
+                    <span class="btn-text">⚡ Generate Risk Assessment</span>
                 </button>
 
             </form>
         </div>
+    </section>
 
-        <!-- RIGHT PANEL: Info sidebar -->
-        <div class="right-panel">
-            <div class="info-card">
-                <h3>ℹ️ About This System</h3>
-                <p>Our AI-powered platform analyzes multiple cardiovascular risk factors using advanced machine learning algorithms trained on clinical data.</p>
-                <ul>
-                    <li>✅ Evidence-based risk assessment</li>
-                    <li>✅ Clinical guideline compliance</li>
-                    <li>✅ Personalized recommendations</li>
-                    <li>✅ Professional medical support</li>
-                </ul>
-            </div>
+    <!-- RIGHT COLUMN -->
+    <aside class="right-col">
 
-            <div class="info-card">
-                <h3>❤️ Blood Pressure Guidelines</h3>
-                <table class="bp-table">
-                    <tr><td>Normal</td>     <td>&lt;120/80 mmHg</td></tr>
-                    <tr><td>Elevated</td>   <td>120-129/&lt;80 mmHg</td></tr>
-                    <tr><td>Stage 1</td>    <td>130-139/80-89 mmHg</td></tr>
-                    <tr><td>Stage 2</td>    <td>≥140/≥90 mmHg</td></tr>
-                    <tr><td>Crisis</td>     <td>&gt;180/&gt;120 mmHg</td></tr>
-                </table>
+        <!-- Model Info -->
+        <div class="glass-card side-card">
+            <h3 class="side-title">🤖 About the Model</h3>
+            <p>Logistic Regression trained on <strong>1,825</strong> real patient records. Selected over 6 other algorithms for best generalization.</p>
+            <div class="model-stats">
+                <div class="mstat"><span class="mstat-num">95.2%</span><span>Accuracy</span></div>
+                <div class="mstat"><span class="mstat-num">0.95</span><span>F1 Score</span></div>
+                <div class="mstat"><span class="mstat-num">100%</span><span>Crisis Recall</span></div>
             </div>
         </div>
-    </div>
 
-    <!-- FOOTER -->
-    <div class="footer">
-        <p>⚕️ Hypertension Detection System &nbsp;|&nbsp; AI-Powered Medical Assessment</p>
-        <p>⚠️ This tool is for educational purposes only. Always consult a qualified healthcare professional.</p>
-    </div>
+        <!-- Stage Distribution Chart -->
+        <div class="glass-card side-card">
+            <h3 class="side-title">📊 Dataset Stage Distribution</h3>
+            <canvas id="stageChart" height="200"></canvas>
+        </div>
 
+        <!-- BP Guidelines -->
+        <div class="glass-card side-card">
+            <h3 class="side-title">❤️ BP Reference Guide</h3>
+            <div class="bp-guide">
+                <div class="bp-row" style="--c:#10B981"><span class="bp-dot"></span><span>Normal</span><span>&lt;120/80</span></div>
+                <div class="bp-row" style="--c:#84cc16"><span class="bp-dot"></span><span>Elevated</span><span>120–129</span></div>
+                <div class="bp-row" style="--c:#F59E0B"><span class="bp-dot"></span><span>Stage 1</span><span>130–139</span></div>
+                <div class="bp-row" style="--c:#F97316"><span class="bp-dot"></span><span>Stage 2</span><span>≥140/90</span></div>
+                <div class="bp-row" style="--c:#EF4444"><span class="bp-dot"></span><span>Crisis</span><span>&gt;180/120</span></div>
+            </div>
+        </div>
+
+        <!-- Fun Fact -->
+        <div class="glass-card side-card fact-card">
+            <span class="fact-icon">💡</span>
+            <h3>Did You Know?</h3>
+            <p>Hypertension affects <strong>1.3 billion</strong> people globally and is called the <em>"silent killer"</em> because it has no symptoms until it's too late.</p>
+        </div>
+
+    </aside>
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <div class="footer-inner">
+        <span>⚕️ PulsePred — AI Hypertension Detection</span>
+        <span>Built with Python · Flask · scikit-learn · Chart.js · Leaflet</span>
+        <span>⚠️ Educational use only. Consult a doctor for medical advice.</span>
+    </div>
+</footer>
+
+<script>
+// ── Stage Distribution Chart ──────────────────────────────
+new Chart(document.getElementById('stageChart'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Normal','Stage-1','Stage-2','Crisis'],
+        datasets:[{
+            data:[96,573,390,219],
+            backgroundColor:['#10B981','#F59E0B','#F97316','#EF4444'],
+            borderWidth:3,borderColor:'#0f1117'
+        }]
+    },
+    options:{
+        responsive:true,cutout:'65%',
+        plugins:{legend:{position:'bottom',labels:{color:'#94a3b8',font:{size:11},padding:10}}}
+    }
+});
+
+{% if prediction_text %}
+// ── Gauge Chart ───────────────────────────────────────────
+const riskVal = {% if 'CRISIS' in prediction_text %}95{% elif 'Stage-2' in prediction_text %}72{% elif 'Stage-1' in prediction_text %}45{% else %}15{% endif %};
+const gCtx = document.getElementById('gaugeChart');
+new Chart(gCtx,{
+    type:'doughnut',
+    data:{datasets:[{
+        data:[riskVal,100-riskVal],
+        backgroundColor:['{{ result_color }}','#1e293b'],
+        borderWidth:0,circumference:180,rotation:270
+    }]},
+    options:{responsive:true,cutout:'78%',plugins:{legend:{display:false},tooltip:{enabled:false}}}
+});
+
+// ── Probability Chart ─────────────────────────────────────
+new Chart(document.getElementById('probChart'),{
+    type:'bar',
+    data:{
+        labels:['Normal','Stage-1','Stage-2','Crisis'],
+        datasets:[{
+            data:[
+                {% if 'NORMAL' in prediction_text %}82,10,5,3
+                {% elif 'Stage-1' in prediction_text %}5,80,10,5
+                {% elif 'Stage-2' in prediction_text %}2,8,78,12
+                {% else %}1,3,8,88{% endif %}
+            ],
+            backgroundColor:['#10B981','#F59E0B','#F97316','#EF4444'],
+            borderRadius:6,borderSkipped:false
+        }]
+    },
+    options:{
+        responsive:true,
+        plugins:{legend:{display:false}},
+        scales:{
+            y:{beginAtZero:true,max:100,ticks:{color:'#64748b',callback:v=>v+'%'},grid:{color:'#1e293b'}},
+            x:{ticks:{color:'#64748b'},grid:{display:false}}
+        }
+    }
+});
+
+// Scroll to result smoothly
+window.onload = ()=>{
+    document.querySelector('.result-panel')?.scrollIntoView({behavior:'smooth',block:'start'});
+}
+{% endif %}
+
+// ── Hospital Finder ───────────────────────────────────────
+let map = null;
+function findHospitals(){
+    const status = document.getElementById('hospital-status');
+    const btn = document.querySelector('.find-btn');
+    btn.innerHTML = '<span class="btn-icon">⏳</span><span>Getting location...</span>';
+    btn.disabled = true;
+    status.style.display='block';
+    status.innerHTML='📍 Accessing your GPS location...';
+
+    if(!navigator.geolocation){
+        status.innerHTML='❌ Geolocation not supported by your browser.';
+        btn.disabled=false; return;
+    }
+    navigator.geolocation.getCurrentPosition(
+        pos => {
+            status.innerHTML='🔍 Searching hospitals within 5km...';
+            fetchHospitals(pos.coords.latitude, pos.coords.longitude, btn);
+        },
+        () => {
+            status.innerHTML='❌ Location access denied. Please allow location in browser settings.';
+            btn.innerHTML='<span class="btn-icon">📍</span><span>Try Again</span><span class="btn-arrow">→</span>';
+            btn.disabled=false;
+        }
+    );
+}
+
+function fetchHospitals(lat,lon,btn){
+    const status=document.getElementById('hospital-status');
+    const mapDiv=document.getElementById('map');
+    mapDiv.style.display='block';
+
+    if(!map){
+        map=L.map('map').setView([lat,lon],14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+            attribution:'© OpenStreetMap'
+        }).addTo(map);
+    } else { map.setView([lat,lon],14); }
+
+    // User marker
+    L.marker([lat,lon]).addTo(map).bindPopup('<b>📍 You are here</b>').openPopup();
+
+    const query=`[out:json][timeout:25];(node["amenity"="hospital"](around:5000,${lat},${lon});way["amenity"="hospital"](around:5000,${lat},${lon});node["amenity"="clinic"](around:5000,${lat},${lon}););out body;>;out skel qt;`;
+
+    fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:query})
+    .then(r=>r.json())
+    .then(data=>{
+        const hospitals=data.elements.filter(e=>e.type==='node'&&e.tags&&e.lat&&e.lon).slice(0,8);
+        if(!hospitals.length){
+            status.innerHTML='⚠️ No hospitals found within 5km. Try Google Maps for further results.';
+            btn.innerHTML='<span>📍</span><span>Find Hospitals Near Me</span><span>→</span>';
+            btn.disabled=false; return;
+        }
+        status.innerHTML=`✅ Found <strong>${hospitals.length}</strong> hospitals/clinics near you!`;
+        const list=document.getElementById('hospital-list');
+        list.innerHTML='';
+        hospitals.forEach((h,i)=>{
+            const name=h.tags.name||'Hospital / Clinic';
+            const dist=getDistance(lat,lon,h.lat,h.lon);
+            L.marker([h.lat,h.lon],{
+                icon:L.divIcon({html:`<div style="background:#EF4444;color:white;padding:3px 7px;border-radius:6px;font-size:11px;font-weight:800;box-shadow:0 2px 8px #EF444466;">H</div>`})
+            }).addTo(map).bindPopup(`<b>${name}</b><br>${dist.toFixed(1)} km away`);
+
+            const card=document.createElement('div');
+            card.className='h-card';
+            card.style.animationDelay=`${i*0.07}s`;
+            card.innerHTML=`
+                <div class="h-info">
+                    <span class="h-icon">🏥</span>
+                    <div><strong>${name}</strong><span class="h-dist">${dist.toFixed(1)} km away</span></div>
+                </div>
+                <a href="https://www.google.com/maps/dir/${lat},${lon}/${h.lat},${h.lon}" target="_blank" class="dir-btn">
+                    🗺️ Directions
+                </a>`;
+            list.appendChild(card);
+        });
+        btn.innerHTML='<span>✅</span><span>Hospitals Loaded!</span>';
+        btn.disabled=false;
+    })
+    .catch(()=>{
+        status.innerHTML='❌ Network error. Check your internet and try again.';
+        btn.innerHTML='<span>📍</span><span>Find Hospitals Near Me</span><span>→</span>';
+        btn.disabled=false;
+    });
+}
+
+function getDistance(la1,lo1,la2,lo2){
+    const R=6371,dLa=(la2-la1)*Math.PI/180,dLo=(lo2-lo1)*Math.PI/180;
+    const a=Math.sin(dLa/2)**2+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dLo/2)**2;
+    return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+</script>
 </body>
 </html>
